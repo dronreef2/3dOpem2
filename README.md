@@ -17,26 +17,42 @@ NeuroForge 3D é um projeto que utiliza modelos de IA de última geração para 
 
 ## 🚀 Quick Start
 
+**🎯 Novo usuário?** Comece com nosso guia completo: **[QUICK_START.md](QUICK_START.md)**
+
+O guia de Quick Start cobre:
+- ✅ Iniciar o servidor com Docker Compose
+- ✅ Gerar seu primeiro modelo 3D via interface web
+- ✅ Instalar e usar o plugin do Blender
+- ✅ Próximos passos e melhorias futuras
+
+### Início Rápido (Docker Compose)
+
+```bash
+# Clone o repositório
+git clone https://github.com/dronreef2/3dOpem2.git
+cd 3dOpem2
+
+# Inicie o servidor (vai baixar modelos de IA na primeira vez)
+docker-compose up --build
+
+# Acesse http://localhost:7860 no navegador
+```
+
 ### Pré-requisitos
 
 - Docker com suporte a GPU (nvidia-docker)
 - NVIDIA GPU com pelo menos 16GB de memória
 - CUDA Toolkit 12.1 ou superior
+- Blender 4.1+ (opcional, para o plugin)
 
-### Instalação com Docker
+### Instalação com Docker (Alternativa)
 
-1. Clone o repositório:
-```bash
-git clone https://github.com/dronreef2/3dOpem2.git
-cd 3dOpem2
-```
-
-2. Construa a imagem Docker:
+1. Construa a imagem Docker:
 ```bash
 docker build -t neuroforge3d:latest .
 ```
 
-3. Execute o container:
+2. Execute o container:
 ```bash
 docker run --gpus all -it --rm \
   -v $(pwd):/app \
@@ -245,6 +261,23 @@ Ver documentação completa em [`blender_plugin/README.md`](blender_plugin/READM
 ### ✅ SPRINT 4: UI & Blender (Completo)
 - [x] Gradio App
 - [x] Blender Add-on
+
+## 📚 Documentação
+
+### Guias de Usuário
+- **[QUICK_START.md](QUICK_START.md)** - 🚀 Guia de início rápido e primeiro voo
+- **[README.md](README.md)** - Documentação completa do projeto
+- **[blender_plugin/README.md](blender_plugin/README.md)** - Guia do plugin Blender
+
+### Documentação Técnica
+- **[ARCHITECTURE.md](ARCHITECTURE.md)** - Arquitetura do sistema
+- **[TECHNICAL_BLUEPRINT.md](TECHNICAL_BLUEPRINT.md)** - Blueprint técnico detalhado
+- **[CODING_STANDARDS.md](CODING_STANDARDS.md)** - Padrões de código
+- **[ROADMAP.md](ROADMAP.md)** - Roadmap de desenvolvimento
+
+### Referências de Implementação
+- **[SPRINT4_SUMMARY.md](SPRINT4_SUMMARY.md)** - Resumo da Sprint 4 (UI & Blender)
+- **[IMPLEMENTATION_SUMMARY.md](IMPLEMENTATION_SUMMARY.md)** - Resumos de implementação
 
 ## 🔧 Ferramentas de Desenvolvimento
 
