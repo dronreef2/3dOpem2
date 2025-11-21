@@ -100,7 +100,7 @@ COPY validate_docker.sh /app/validate_docker.sh
 RUN mkdir -p /app/models /app/outputs
 
 # Set Python path
-ENV PYTHONPATH=/app:$PYTHONPATH
+ENV PYTHONPATH="/app:${PYTHONPATH}"
 
 # Environment variables for TRELLIS compatibility
 ENV ATTN_BACKEND=xformers
