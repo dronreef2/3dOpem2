@@ -8,6 +8,9 @@
 # ============================================================================
 FROM nvidia/cuda:12.1.0-devel-ubuntu22.04 AS builder
 
+# Build argument to control PyTorch installation type (cuda or cpu)
+ARG PYTORCH_VARIANT=cuda
+
 # Prevent interactive prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PYTHONUNBUFFERED=1
@@ -54,6 +57,9 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 # STAGE 2: RUNTIME - Minimal runtime environment
 # ============================================================================
 FROM nvidia/cuda:12.1.0-runtime-ubuntu22.04 AS runtime
+
+# Pass build argument to runtime stage
+ARG PYTORCH_VARIANT=cuda
 
 # Prevent interactive prompts
 ENV DEBIAN_FRONTEND=noninteractive

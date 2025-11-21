@@ -72,12 +72,15 @@ jobs:
           cache-to: type=gha,mode=max
           build-args: |
             BUILDKIT_INLINE_CACHE=1
+            PYTORCH_VARIANT=cpu
+        # Note: CI builds use CPU-only PyTorch to save disk space
+        # Production builds use CUDA variant for GPU support
 
       - name: Test Docker image
         run: |
           echo "Testing Docker image basic functionality..."
           docker run --rm ${{ env.IMAGE_NAME }}:test python3 --version
-          docker run --rm ${{ env.IMAGE_NAME }}:test python3 -c "import torch; print(f'PyTorch version: {torch.__version__}')"
+          docker run --rm ${{ env.IMAGE_NAME }}:test python3 -c "import torch; print(f'PyTorch version: {torch.__version__}'); print(f'CUDA available: {torch.cuda.is_available()}')"
           docker run --rm ${{ env.IMAGE_NAME }}:test python3 -c "import trimesh; print(f'Trimesh version: {trimesh.__version__}')"
           docker run --rm ${{ env.IMAGE_NAME }}:test python3 -c "import gradio; print(f'Gradio version: {gradio.__version__}')"
 
@@ -109,6 +112,7 @@ jobs:
           cache-to: type=gha,mode=max
           build-args: |
             BUILDKIT_INLINE_CACHE=1
+            PYTORCH_VARIANT=cuda
 
       - name: Image digest
         if: github.event_name != 'pull_request'
