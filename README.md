@@ -17,9 +17,12 @@ Follow the detailed instructions in [TECHNICAL_BLUEPRINT.md](TECHNICAL_BLUEPRINT
 
 ### Immediate First Steps (Sprint 0)
 
+> **Note:** For complete setup commands including .gitkeep files and .gitignore configuration, see the "Comandos de Inicialização" section in [TECHNICAL_BLUEPRINT.md](TECHNICAL_BLUEPRINT.md).
+
 ```bash
 # 1. Create project structure
 mkdir -p .github/workflows .devcontainer docs scripts src/{core,processing,ui,utils} tests models outputs
+touch models/.gitkeep outputs/.gitkeep
 
 # 2. Set up Python environment
 python3 -m venv .venv
