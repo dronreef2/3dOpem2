@@ -32,7 +32,8 @@ services:
       - PYTHONUNBUFFERED=1
       - ATTN_BACKEND=xformers
       - SPCONV_ALGO=native
-      - CUDA_VISIBLE_DEVICES=0
+      # Uncomment to limit to specific GPU(s)
+      # - CUDA_VISIBLE_DEVICES=0
     
     # Keep container running
     stdin_open: true
