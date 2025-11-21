@@ -157,13 +157,17 @@ class TrellisGenerator(BaseGenerator):
 
         TRELLIS converts 2D images to 3D meshes. It requires images with
         transparent or white backgrounds for best results.
+
+        Note:
+            This implementation assumes TRELLIS is available as a package.
+            If using a local implementation, modify the import statement
+            to point to your local TRELLIS installation:
+                from local_trellis.pipelines import TrellisImageTo3DPipeline
         """
         try:
             logger.info(f"Loading image-to-3D model: {self.img2mesh_model_id}")
 
             # Import TRELLIS from the library
-            # Note: This assumes TRELLIS is installed as a package
-            # If it's a local implementation, adjust the import
             try:
                 from trellis.pipelines import TrellisImageTo3DPipeline
 
@@ -311,11 +315,13 @@ class TrellisGenerator(BaseGenerator):
         try:
             if self.img2mesh_model is None:
                 # Fallback: Create a simple placeholder mesh
+                # Using a small fixed size since this is just a placeholder
                 logger.warning(
                     "TRELLIS model not available. Creating placeholder cube mesh."
                 )
+                placeholder_size = 50.0  # Fixed size for placeholder
                 mesh = trimesh.creation.box(
-                    extents=[self.target_size_mm, self.target_size_mm, self.target_size_mm]
+                    extents=[placeholder_size, placeholder_size, placeholder_size]
                 )
                 return mesh
 
@@ -324,22 +330,20 @@ class TrellisGenerator(BaseGenerator):
 
             # Extract mesh from TRELLIS output
             # The exact format depends on TRELLIS implementation
-            # This is a simplified version
-            if hasattr(result, "mesh"):
+            if isinstance(result, trimesh.Trimesh):
+                # Direct trimesh object
+                mesh = result
+            elif hasattr(result, "mesh"):
+                # Result has a mesh attribute
                 mesh_data = result.mesh
+                if isinstance(mesh_data, trimesh.Trimesh):
+                    mesh = mesh_data
+                else:
+                    # Construct trimesh from mesh_data
+                    mesh = self._construct_mesh_from_data(mesh_data)
             else:
-                mesh_data = result
-
-            # Convert to trimesh format
-            # TRELLIS typically outputs vertices and faces
-            if isinstance(mesh_data, trimesh.Trimesh):
-                mesh = mesh_data
-            else:
-                # Construct trimesh from vertices and faces
-                vertices = mesh_data.get("vertices", mesh_data.get("verts"))
-                faces = mesh_data.get("faces")
-
-                mesh = trimesh.Trimesh(vertices=vertices, faces=faces)
+                # Try to construct mesh from result dictionary
+                mesh = self._construct_mesh_from_data(result)
 
             logger.info(
                 f"3D mesh generated: {len(mesh.vertices)} vertices, "
@@ -351,6 +355,44 @@ class TrellisGenerator(BaseGenerator):
         except Exception as e:
             logger.error(f"3D mesh generation failed: {e}", exc_info=True)
             raise RuntimeError(f"3D mesh generation failed: {e}") from e
+
+    def _construct_mesh_from_data(self, mesh_data: Any) -> trimesh.Trimesh:
+        """
+        Helper method to construct Trimesh from various data formats.
+
+        Args:
+            mesh_data: Dictionary or object containing vertices and faces.
+
+        Returns:
+            Constructed Trimesh object.
+
+        Raises:
+            RuntimeError: If mesh data format is unsupported.
+        """
+        # Try to extract vertices and faces
+        vertices = None
+        faces = None
+
+        if isinstance(mesh_data, dict):
+            # Try standard keys
+            vertices = mesh_data.get("vertices") or mesh_data.get("verts")
+            faces = mesh_data.get("faces")
+        elif hasattr(mesh_data, "vertices") or hasattr(mesh_data, "verts"):
+            # Try object attributes
+            vertices = getattr(mesh_data, "vertices", None) or getattr(
+                mesh_data, "verts", None
+            )
+            faces = getattr(mesh_data, "faces", None)
+
+        if vertices is None or faces is None:
+            raise RuntimeError(
+                f"Unsupported TRELLIS output format. Expected dictionary with "
+                f"'vertices'/'verts' and 'faces' keys, or object with these "
+                f"attributes. Got: {type(mesh_data).__name__}"
+            )
+
+        mesh = trimesh.Trimesh(vertices=vertices, faces=faces)
+        return mesh
 
     def _generate_raw(self, prompt: str) -> trimesh.Trimesh:
         """
@@ -400,6 +442,12 @@ class TrellisGenerator(BaseGenerator):
         1. Generate raw mesh using _generate_raw() (3-stage pipeline)
         2. Process mesh (repair, scale, validate) using ProcessingPipeline
         3. Save as STL if validation passes
+
+        Note:
+            The ProcessingPipeline's validation includes the watertight check
+            (mesh.is_watertight) which is the golden rule enforced by
+            BaseGenerator.validate_mesh(). This ensures consistency with
+            other generators while adding additional repair and scaling.
 
         Args:
             prompt: Text description of the 3D model to generate.
