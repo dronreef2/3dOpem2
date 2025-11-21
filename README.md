@@ -100,20 +100,119 @@ Isto irá gerar arquivos STL de teste na pasta `outputs/` demonstrando:
 
 Ver `requirements.txt` para lista completa.
 
-## 🗂️ Estrutura do Projeto (Planejada)
+## 🎨 Usando a Interface Web (Gradio)
+
+### Iniciar a Interface
+
+**Com Docker Compose (Recomendado):**
+```bash
+docker-compose up
+# Acesse http://localhost:7860 no navegador
+```
+
+**Com Docker Run:**
+```bash
+docker run --gpus all -p 7860:7860 -v $(pwd)/outputs:/app/outputs neuroforge3d:sprint1 python launch_ui.py
+```
+
+**Localmente:**
+```bash
+python launch_ui.py
+# ou
+python -m src.ui.app
+```
+
+### Usando a Interface
+
+1. **Abra seu navegador** em `http://localhost:7860`
+2. **Digite um prompt** descrevendo o modelo 3D desejado
+   - Exemplo: "a modern coffee mug with a curved handle"
+3. **Configure os parâmetros:**
+   - **Target Size**: Tamanho em mm (10-500mm)
+   - **Seed**: Para resultados reproduzíveis (opcional)
+4. **Clique em "Generate 3D Model"**
+5. **Aguarde** a geração (2-5 minutos)
+6. **Visualize** o modelo 3D no viewer interativo
+7. **Download** o arquivo STL para impressão 3D
+
+### Recursos da Interface
+
+- ✅ **Visualização 3D Interativa**: Rotacione e examine o modelo
+- ✅ **Download Direto**: Baixe o STL pronto para impressão
+- ✅ **Exemplos**: Prompts prontos para experimentar
+- ✅ **Queue System**: Gerencia requisições longas sem timeout
+- ✅ **Feedback em Tempo Real**: Acompanhe o progresso da geração
+
+## 🔧 Plugin para Blender
+
+### Instalação
+
+1. **Abra o Blender** (versão 3.0+)
+2. **Vá em** `Edit > Preferences > Add-ons`
+3. **Clique em** `Install...`
+4. **Selecione** `blender_plugin/neuroforge_importer/__init__.py`
+5. **Ative** o add-on "NeuroForge 3D Importer"
+6. **Configure** o diretório de output nas preferências do add-on
+
+### Configuração com Docker
+
+Se você usa Docker, mapeie o volume de outputs:
+
+```bash
+# Docker Compose (já configurado)
+docker-compose up
+
+# Ou com docker run
+docker run --gpus all -v $(pwd)/outputs:/app/outputs -p 7860:7860 neuroforge3d:sprint1
+```
+
+No Blender, configure o caminho local do diretório `outputs` nas preferências do add-on.
+
+### Uso do Plugin
+
+1. **Abra o painel** pressionando `N` na viewport 3D
+2. **Clique na aba** "NeuroForge"
+3. **Clique em "Refresh"** para listar os arquivos STL disponíveis
+4. **Selecione um arquivo** no dropdown
+5. **Clique em "Import STL"**
+6. O modelo será importado, centralizado e com smooth shading aplicado!
+
+### Recursos do Plugin
+
+- 🔄 **Auto-refresh**: Lista todos os STLs do diretório
+- 📦 **Import Inteligente**: Centraliza automaticamente
+- 🎨 **Smooth Shading**: Aplica sombreamento suave
+- ⚙️ **Configurável**: Define o diretório de outputs
+
+Ver documentação completa em [`blender_plugin/README.md`](blender_plugin/README.md).
+
+## 🗂️ Estrutura do Projeto
 
 ```
 3dOpem2/
 ├── src/
 │   ├── core/
-│   │   └── generator.py      # Interface principal de geração
-│   ├── processors/
-│   │   └── mesh_cleaner.py   # Pipeline de limpeza de malha
+│   │   ├── base_generator.py      # Abstract base class
+│   │   ├── mock_generator.py      # Mock implementation
+│   │   └── trellis_generator.py   # TRELLIS AI generator
+│   ├── processing/
+│   │   ├── mesh_repair.py         # Mesh repair utilities
+│   │   ├── mesh_scaling.py        # Scaling utilities
+│   │   ├── mesh_validator.py      # Validation utilities
+│   │   └── pipeline.py            # Complete processing pipeline
+│   ├── ui/
+│   │   ├── __init__.py
+│   │   └── app.py                 # Gradio web interface
 │   └── utils/
-├── models/                    # Pesos dos modelos (não versionados)
-├── outputs/                   # Resultados gerados
+├── blender_plugin/
+│   └── neuroforge_importer/       # Blender add-on
+│       └── __init__.py
+├── models/                         # Pesos dos modelos (não versionados)
+├── outputs/                        # Resultados gerados
 ├── tests/
 ├── Dockerfile
+├── docker-compose.yml
+├── launch_ui.py                    # Script para iniciar Gradio UI
 ├── requirements.txt
 └── README.md
 ```
@@ -143,9 +242,9 @@ Ver `requirements.txt` para lista completa.
 - [x] Normalização de escala
 - [x] Sistema completo de reparo de malhas
 
-### 📅 SPRINT 4: UI & Blender
-- [ ] Gradio App
-- [ ] Blender Add-on
+### ✅ SPRINT 4: UI & Blender (Completo)
+- [x] Gradio App
+- [x] Blender Add-on
 
 ## 🔧 Ferramentas de Desenvolvimento
 
