@@ -16,6 +16,7 @@ ENV PYTHONUNBUFFERED=1
 RUN apt-get update && apt-get install -y \
     python3.10 \
     python3-pip \
+    python3-dev \
     python3.10-dev \
     build-essential \
     git \
@@ -48,7 +49,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 
 # Install all other Python dependencies with pip cache mounting
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip3 install --no-cache-dir -r /build/requirements.txt
+    pip3 install --no-cache-dir --default-timeout=100 -r /build/requirements.txt
 
 # ============================================================================
 # STAGE 2: RUNTIME - Minimal runtime environment
