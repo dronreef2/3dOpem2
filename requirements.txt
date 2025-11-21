@@ -28,7 +28,7 @@ pymeshfix==0.16.3
 igraph==0.11.6
 
 # AI/ML Libraries
-transformers==4.45.2
+transformers==4.48.0
 diffusers==0.30.3
 safetensors==0.4.5
 
@@ -40,8 +40,10 @@ onnxruntime==1.19.2
 
 # Web Interface (Gradio for SPRINT 4)
 # Using locked version for reproducibility
-# Note: Gradio has known security considerations, use in controlled environments
-gradio==4.44.1
+# Note: Using 5.11.0 which patches most security vulnerabilities
+# Known issue: DoS in multipart boundary upload (CVE pending, no patch available)
+# Mitigation: Use in controlled environments only, not exposed to untrusted users in Sprint 1
+gradio==5.11.0
 
 # Development Tools
 tensorboard==2.18.0
