@@ -11,8 +11,18 @@ from typing import Dict, List, Any
 
 logger = logging.getLogger(__name__)
 
+# Validation thresholds (can be configured as needed)
+MIN_VOLUME_MM3 = 1.0  # Minimum volume in cubic millimeters
+MAX_FACE_COUNT_WARNING = 500000  # Face count threshold for complexity warning
+ZERO_AREA_THRESHOLD = 1e-10  # Threshold for detecting degenerate faces
 
-def validate_for_printing(mesh: trimesh.Trimesh) -> Dict[str, Any]:
+
+def validate_for_printing(
+    mesh: trimesh.Trimesh,
+    min_volume_mm3: float = MIN_VOLUME_MM3,
+    max_face_count_warning: int = MAX_FACE_COUNT_WARNING,
+    zero_area_threshold: float = ZERO_AREA_THRESHOLD,
+) -> Dict[str, Any]:
     """
     Validate a mesh for 3D printing suitability.
 
@@ -22,6 +32,12 @@ def validate_for_printing(mesh: trimesh.Trimesh) -> Dict[str, Any]:
 
     Args:
         mesh: The Trimesh object to validate.
+        min_volume_mm3: Minimum acceptable volume in cubic millimeters.
+                       Meshes smaller than this trigger a warning.
+        max_face_count_warning: Face count above which a complexity warning
+                               is issued.
+        zero_area_threshold: Area threshold below which faces are considered
+                            degenerate.
 
     Returns:
         Dictionary containing validation results:
@@ -116,14 +132,14 @@ def validate_for_printing(mesh: trimesh.Trimesh) -> Dict[str, Any]:
         body_count = 1  # Assume single body if check fails
 
     # Warning 2: Very small volume
-    if 0 < volume < 1.0:  # Less than 1 cubic millimeter
+    if 0 < volume < min_volume_mm3:
         warnings.append(
             f"Very small volume ({volume:.4f} mm³). "
             f"Model may be too small for reliable printing."
         )
 
     # Warning 3: Very large number of faces (may be over-detailed)
-    if len(mesh.faces) > 500000:
+    if len(mesh.faces) > max_face_count_warning:
         warnings.append(
             f"High polygon count ({len(mesh.faces)} faces). "
             f"Consider decimating the mesh to reduce file size and "
@@ -135,7 +151,7 @@ def validate_for_printing(mesh: trimesh.Trimesh) -> Dict[str, Any]:
         if hasattr(mesh, "face_normals"):
             # Check for zero-area faces
             face_areas = mesh.area_faces
-            zero_area_count = (face_areas < 1e-10).sum()
+            zero_area_count = (face_areas < zero_area_threshold).sum()
             if zero_area_count > 0:
                 warnings.append(
                     f"Found {zero_area_count} degenerate (zero-area) faces. "
