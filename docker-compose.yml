@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  neuroforge3d:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: neuroforge3d:sprint1
+    container_name: neuroforge3d-dev
+    
+    # Enable GPU support
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    
+    # Volume mounts
+    volumes:
+      - ./src:/app/src
+      - ./outputs:/app/outputs
+      - ./models:/app/models
+    
+    # Port mapping for Gradio (SPRINT 4)
+    ports:
+      - "7860:7860"
+    
+    # Environment variables
+    environment:
+      - PYTHONUNBUFFERED=1
+      - ATTN_BACKEND=xformers
+      - SPCONV_ALGO=native
+      - CUDA_VISIBLE_DEVICES=0
+    
+    # Keep container running
+    stdin_open: true
+    tty: true
+    
+    # Default command
+    command: /bin/bash
