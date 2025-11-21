@@ -4,6 +4,8 @@
 # All versions are locked (package==X.Y.Z) to ensure reproducible builds
 
 # Core PyTorch (installed separately in Dockerfile for CUDA compatibility)
+# These packages are installed in the Dockerfile with specific CUDA support
+# and are NOT installed from this requirements.txt file:
 # torch==2.4.0
 # torchvision==0.19.0
 # xformers==0.0.27.post2

@@ -78,7 +78,11 @@ WORKDIR /app
 
 # Copy Python packages from builder stage
 COPY --from=builder /usr/local/lib/python3.10/dist-packages /usr/local/lib/python3.10/dist-packages
-COPY --from=builder /usr/local/bin /usr/local/bin
+
+# Copy only Python-related executables from builder
+# This is more selective than copying all of /usr/local/bin
+COPY --from=builder /usr/local/bin/python* /usr/local/bin/
+COPY --from=builder /usr/local/bin/pip* /usr/local/bin/
 
 # Copy application source code
 COPY src/ /app/src/
@@ -102,8 +106,10 @@ EXPOSE 7860
 CMD ["/bin/bash"]
 
 # Health check (verify CUDA and Python are working)
+# Note: This check is designed for GPU-enabled deployments
+# For CPU-only environments, override the health check or disable it
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD python3 -c "import torch; assert torch.cuda.is_available(), 'CUDA not available'" || exit 1
+    CMD python3 -c "import sys; import torch; sys.exit(0 if torch.cuda.is_available() else 1)" || exit 1
 
 # Labels for documentation
 LABEL maintainer="NeuroForge 3D Team"
