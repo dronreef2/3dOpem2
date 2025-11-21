@@ -77,6 +77,8 @@ jobs:
           build-args: |
             BUILDKIT_INLINE_CACHE=1
             PYTORCH_VARIANT=cpu
+        # Note: CI builds use CPU-only PyTorch to save disk space
+        # Production builds use CUDA variant for GPU support
 
       - name: Test Docker image
         run: |
@@ -114,6 +116,7 @@ jobs:
           cache-to: type=gha,mode=max
           build-args: |
             BUILDKIT_INLINE_CACHE=1
+            PYTORCH_VARIANT=cuda
 
       - name: Image digest
         if: github.event_name != 'pull_request'

@@ -73,6 +73,9 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 # ============================================================================
 FROM nvidia/cuda:12.1.0-runtime-ubuntu22.04 AS runtime
 
+# Pass build argument to runtime stage
+ARG PYTORCH_VARIANT=cuda
+
 # Prevent interactive prompts
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PYTHONUNBUFFERED=1
@@ -123,11 +126,17 @@ EXPOSE 7860
 # Default command (can be overridden)
 CMD ["/bin/bash"]
 
-# Health check (verify CUDA and Python are working)
-# Note: This check is designed for GPU-enabled deployments
-# For CPU-only environments, override the health check or disable it
+# Health check - validates PyTorch import and availability
+# For CUDA builds: verifies CUDA is available
+# For CPU builds: just verifies PyTorch can be imported
+RUN if [ "$PYTORCH_VARIANT" = "cpu" ]; then \
+        echo '#!/bin/sh\npython3 -c "import torch; import sys; sys.exit(0)"' > /usr/local/bin/healthcheck.sh; \
+    else \
+        echo '#!/bin/sh\npython3 -c "import sys; import torch; sys.exit(0 if torch.cuda.is_available() else 1)"' > /usr/local/bin/healthcheck.sh; \
+    fi && chmod +x /usr/local/bin/healthcheck.sh
+
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD python3 -c "import sys; import torch; sys.exit(0 if torch.cuda.is_available() else 1)" || exit 1
+    CMD /usr/local/bin/healthcheck.sh
 
 # Labels for documentation
 LABEL maintainer="NeuroForge 3D Team"
