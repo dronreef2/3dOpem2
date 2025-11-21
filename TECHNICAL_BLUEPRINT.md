@@ -121,6 +121,7 @@ mkdir -p .github/workflows .devcontainer docs scripts src/{core,processing,ui,ut
 touch .github/workflows/{gemini-review.yml,ci.yml,docker-build.yml}
 touch .devcontainer/devcontainer.json
 touch setup_env.sh
+touch models/.gitkeep outputs/.gitkeep
 echo "models/*" >> .gitignore
 echo "outputs/*" >> .gitignore
 echo "!models/.gitkeep" >> .gitignore
