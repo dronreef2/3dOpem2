@@ -8,6 +8,9 @@
 # ============================================================================
 FROM nvidia/cuda:12.1.0-devel-ubuntu22.04 AS builder
 
+# Build argument to control PyTorch installation type (cuda or cpu)
+ARG PYTORCH_VARIANT=cuda
+
 # Prevent interactive prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PYTHONUNBUFFERED=1
@@ -33,18 +36,33 @@ WORKDIR /build
 # Copy requirements file first (for Docker layer caching)
 COPY requirements.txt /build/requirements.txt
 
-# Install PyTorch with CUDA 12.1 support
+# Install PyTorch based on variant (CUDA or CPU)
+# CPU variant is much smaller and suitable for CI/CD testing
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip3 install --no-cache-dir \
-    torch==2.4.0 \
-    torchvision==0.19.0 \
-    --index-url https://download.pytorch.org/whl/cu121
+    if [ "$PYTORCH_VARIANT" = "cpu" ]; then \
+        echo "Installing PyTorch CPU-only variant..." && \
+        pip3 install --no-cache-dir \
+        torch==2.4.0 \
+        torchvision==0.19.0 \
+        --index-url https://download.pytorch.org/whl/cpu; \
+    else \
+        echo "Installing PyTorch with CUDA 12.1 support..." && \
+        pip3 install --no-cache-dir \
+        torch==2.4.0 \
+        torchvision==0.19.0 \
+        --index-url https://download.pytorch.org/whl/cu121; \
+    fi
 
-# Install xformers for attention mechanisms (CUDA-dependent)
+# Install xformers for attention mechanisms (only for CUDA variant)
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip3 install --no-cache-dir \
-    xformers==0.0.27.post2 \
-    --index-url https://download.pytorch.org/whl/cu121
+    if [ "$PYTORCH_VARIANT" = "cuda" ]; then \
+        echo "Installing xformers with CUDA support..." && \
+        pip3 install --no-cache-dir \
+        xformers==0.0.27.post2 \
+        --index-url https://download.pytorch.org/whl/cu121; \
+    else \
+        echo "Skipping xformers for CPU variant..."; \
+    fi
 
 # Install all other Python dependencies with pip cache mounting
 RUN --mount=type=cache,target=/root/.cache/pip \
