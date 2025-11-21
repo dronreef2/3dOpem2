@@ -1,26 +1,20 @@
 # PROJECT CONTEXT: NeuroForge 3D
 
 ## MISSÃO DO PROJETO
-Desenvolver um sistema "Text-to-Printable-3D" open-source e de baixo custo. O objetivo não é apenas gerar visualizações 3D, mas sim arquivos .STL otimizados, "watertight" (fechados) e prontos para fatiadores (slicers) de impressão 3D.
+Sistema "Text-to-Printable-3D" open-source. Foco em geometria válida para impressão (watertight STLs) usando Trellis/Hunyuan3D.
 
-## ARQUITETURA TÉCNICA (IMUTÁVEL)
-1.  **Core AI:** Microsoft TRELLIS (Preferencial) ou Hunyuan3D-2.
-    *   *Fallback:* Shap-E (apenas se VRAM < 8GB).
-2.  **Processamento de Malha:** `Trimesh` e `PyMeshLab`.
-    *   *Regra:* Toda malha deve passar por verificação de `is_watertight` antes de ser salva.
-3.  **Interface:** Gradio (Web UI).
-4.  **Infraestrutura:** Docker (Base: `nvidia/cuda:12.1-devel-ubuntu22.04`).
-5.  **Integração Externa:** Blender Add-on (monitora pasta de saída).
+## STACK DE DESENVOLVIMENTO (AGENTIC TOOLS INSTALADAS)
+Este repositório utiliza um pipeline de IA integrado. O Agente deve estar ciente das seguintes ferramentas disponíveis:
+1.  **Gemini Code Assist:** Utilizado para Code Review em Pull Requests. O código gerado deve ser limpo o suficiente para passar na revisão automática do Gemini.
+2.  **Agentic Search AI:** Disponível para pesquisar documentações recentes (ex: atualizações do Trimesh ou Trellis) antes de gerar código.
+3.  **GitHub Actions:** CI/CD automatizado.
 
-## RESTRIÇÕES DE HARDWARE
-O código deve ser otimizado para rodar em GPUs de consumo (RTX 3060/4060).
-- Use `torch.float16` sempre que possível.
-- Implemente `cpu_offload` para os modelos.
+## ARQUITETURA TÉCNICA (RUNTIME)
+1.  **Core AI:** Microsoft TRELLIS (Principal) ou Hunyuan3D-2.
+2.  **Processamento:** `Trimesh` (foco em `is_watertight` e `repair`).
+3.  **Infra:** Docker (`nvidia/cuda:12.1`).
+4.  **Interface:** Gradio + Blender Add-on.
 
-## ESTRUTURA DE DIRETÓRIOS ALVO
-/src
-  /core (Lógica da IA)
-  /processing (Lógica de geometria/trimesh)
-  /ui (Gradio)
-/blender_plugin (Add-on)
-/output (Volume compartilhado)
+## REGRAS DE INTERAÇÃO
+- **Pesquisa Antes de Codificar:** Use a capacidade de busca para verificar se métodos de bibliotecas (como `diffusers`) não foram depreciados.
+- **Modo PR:** Todo código complexo deve ser planejado para ser submetido via Pull Request para análise do Gemini Code Assist.
