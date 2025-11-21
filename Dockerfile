@@ -1,24 +1,68 @@
-# NeuroForge 3D - SPRINT 1 Dockerfile
+# NeuroForge 3D - SPRINT 1 Optimized Multi-Stage Dockerfile
 # Text-to-Printable-3D using Microsoft TRELLIS
 # Base: NVIDIA CUDA 12.1 (as specified in PROJECT_CONTEXT.md)
+# Architecture: Multi-stage build for reduced image size
 
-FROM nvidia/cuda:12.1.0-devel-ubuntu22.04
+# ============================================================================
+# STAGE 1: BUILDER - Compile dependencies and install packages
+# ============================================================================
+FROM nvidia/cuda:12.1.0-devel-ubuntu22.04 AS builder
 
 # Prevent interactive prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PYTHONUNBUFFERED=1
 
-# Set working directory
-WORKDIR /app
-
-# Install system dependencies
+# Install build dependencies and Python
 RUN apt-get update && apt-get install -y \
     python3.10 \
     python3-pip \
     python3.10-dev \
+    build-essential \
     git \
     wget \
     curl \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Upgrade pip and install build tools
+RUN python3 -m pip install --no-cache-dir --upgrade pip setuptools wheel
+
+# Set working directory for build
+WORKDIR /build
+
+# Copy requirements file first (for Docker layer caching)
+COPY requirements.txt /build/requirements.txt
+
+# Install PyTorch with CUDA 12.1 support
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip3 install --no-cache-dir \
+    torch==2.4.0 \
+    torchvision==0.19.0 \
+    --index-url https://download.pytorch.org/whl/cu121
+
+# Install xformers for attention mechanisms (CUDA-dependent)
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip3 install --no-cache-dir \
+    xformers==0.0.27.post2 \
+    --index-url https://download.pytorch.org/whl/cu121
+
+# Install all other Python dependencies with pip cache mounting
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip3 install --no-cache-dir -r /build/requirements.txt
+
+# ============================================================================
+# STAGE 2: RUNTIME - Minimal runtime environment
+# ============================================================================
+FROM nvidia/cuda:12.1.0-runtime-ubuntu22.04 AS runtime
+
+# Prevent interactive prompts
+ENV DEBIAN_FRONTEND=noninteractive
+ENV PYTHONUNBUFFERED=1
+
+# Install only runtime dependencies (no build tools)
+RUN apt-get update && apt-get install -y \
+    python3.10 \
+    python3-pip \
     libgl1-mesa-glx \
     libglib2.0-0 \
     libsm6 \
@@ -29,24 +73,24 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Upgrade pip
-RUN python3 -m pip install --upgrade pip setuptools wheel
+# Set working directory
+WORKDIR /app
 
-# Install PyTorch with CUDA 12.1 support
-RUN pip3 install torch==2.4.0 torchvision==0.19.0 --index-url https://download.pytorch.org/whl/cu121
+# Copy Python packages from builder stage
+COPY --from=builder /usr/local/lib/python3.10/dist-packages /usr/local/lib/python3.10/dist-packages
 
-# Copy requirements file
-COPY requirements.txt /app/requirements.txt
+# Copy only Python-related executables from builder
+# This is more selective than copying all of /usr/local/bin
+COPY --from=builder /usr/local/bin/python* /usr/local/bin/
+COPY --from=builder /usr/local/bin/pip* /usr/local/bin/
 
-# Install Python dependencies
-RUN pip3 install -r /app/requirements.txt
+# Copy application source code
+COPY src/ /app/src/
+COPY demo.py /app/demo.py
+COPY validate_docker.sh /app/validate_docker.sh
 
-# Install additional CUDA-dependent packages for TRELLIS
-# xformers for attention mechanisms
-RUN pip3 install xformers==0.0.27.post2 --index-url https://download.pytorch.org/whl/cu121
-
-# Create directories for future code
-RUN mkdir -p /app/src/core /app/models /app/outputs
+# Create directories for models and outputs
+RUN mkdir -p /app/models /app/outputs
 
 # Set Python path
 ENV PYTHONPATH=/app:$PYTHONPATH
@@ -55,17 +99,20 @@ ENV PYTHONPATH=/app:$PYTHONPATH
 ENV ATTN_BACKEND=xformers
 ENV SPCONV_ALGO=native
 
+# Expose port for Gradio (SPRINT 4)
+EXPOSE 7860
+
 # Default command (can be overridden)
 CMD ["/bin/bash"]
 
-# Health check (optional, for future web service)
-# HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-#   CMD python3 -c "import torch; print(torch.cuda.is_available())" || exit 1
-
-# Expose port for Gradio (SPRINT 4)
-EXPOSE 7860
+# Health check (verify CUDA and Python are working)
+# Note: This check is designed for GPU-enabled deployments
+# For CPU-only environments, override the health check or disable it
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD python3 -c "import sys; import torch; sys.exit(0 if torch.cuda.is_available() else 1)" || exit 1
 
 # Labels for documentation
 LABEL maintainer="NeuroForge 3D Team"
 LABEL description="Docker image for NeuroForge 3D - Text-to-Printable-3D using TRELLIS"
 LABEL version="sprint-1"
+LABEL org.opencontainers.image.source="https://github.com/dronreef2/3dOpem2"

@@ -1,50 +1,55 @@
-# NeuroForge 3D - SPRINT 1 Requirements
+# NeuroForge 3D - SPRINT 1 Requirements (Locked Versions)
 # Based on Microsoft TRELLIS dependencies
 # Compatible with Python 3.10+ and CUDA 12.1
+# All versions are locked (package==X.Y.Z) to ensure reproducible builds
 
-# Core PyTorch (will be installed separately in Dockerfile for CUDA compatibility)
+# Core PyTorch (installed separately in Dockerfile for CUDA compatibility)
+# These packages are installed in the Dockerfile with specific CUDA support
+# and are NOT installed from this requirements.txt file:
 # torch==2.4.0
 # torchvision==0.19.0
+# xformers==0.0.27.post2
 
 # Image Processing
-pillow>=10.3.0
-imageio>=2.31.0
-imageio-ffmpeg>=0.4.9
-opencv-python-headless>=4.8.1.78
+pillow==10.4.0
+imageio==2.35.1
+imageio-ffmpeg==0.5.1
+opencv-python-headless==4.10.0.84
 
 # Scientific Computing
-numpy>=1.24.0
-scipy>=1.11.0
-tqdm>=4.66.0
+numpy==1.26.4
+scipy==1.14.1
+tqdm==4.66.5
 
 # 3D Processing - Core focus for watertight STL validation
-trimesh>=4.0.0
-open3d>=0.18.0
-xatlas>=0.0.9
-pyvista>=0.43.0
-pymeshfix>=0.16.0
-igraph>=0.11.0
+trimesh==4.4.9
+open3d==0.18.0
+xatlas==0.0.9
+pyvista==0.44.1
+pymeshfix==0.16.3
+igraph==0.11.6
 
 # AI/ML Libraries
-transformers>=4.48.0
-diffusers>=0.24.0
-safetensors>=0.4.0
+transformers==4.48.0
+diffusers==0.30.3
+safetensors==0.4.5
 
 # Utilities
-easydict>=1.11
-ninja>=1.11.0
-rembg>=2.0.0
-onnxruntime>=1.16.0
+easydict==1.13
+ninja==1.11.1.1
+rembg==2.0.59
+onnxruntime==1.19.2
 
-# Web Interface (Gradio for SPRINT 4, but including early for testing)
-# NOTE: Using version 5.11.0+ for most security fixes
-# WARNING: Known DoS vulnerability in multipart boundary upload (affects <= 5.22.0, no patch available yet)
-# This is acceptable for SPRINT 1 as Gradio is not yet deployed in production
-gradio>=5.11.0
+# Web Interface (Gradio for SPRINT 4)
+# Using locked version for reproducibility
+# Note: Using 5.11.0 which patches most security vulnerabilities
+# Known issue: DoS in multipart boundary upload (CVE pending, no patch available)
+# Mitigation: Use in controlled environments only, not exposed to untrusted users in Sprint 1
+gradio==5.11.0
 
 # Development Tools
-tensorboard>=2.15.0
+tensorboard==2.18.0
 
 # Additional utilities from TRELLIS
-einops>=0.7.0
-huggingface-hub>=0.19.0
+einops==0.8.0
+huggingface-hub==0.25.2
