@@ -105,11 +105,10 @@ EXPOSE 7860
 # Default command (can be overridden)
 CMD ["/bin/bash"]
 
-# Health check (verify CUDA and Python are working)
-# Note: This check is designed for GPU-enabled deployments
-# For CPU-only environments, override the health check or disable it
+# Health check (verify Python and PyTorch are working)
+# Updated for CPU-only deployment compatibility
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD python3 -c "import sys; import torch; sys.exit(0 if torch.cuda.is_available() else 1)" || exit 1
+    CMD python3 -c "import sys; import torch; sys.exit(0)" || exit 1
 
 # Labels for documentation
 LABEL maintainer="NeuroForge 3D Team"
