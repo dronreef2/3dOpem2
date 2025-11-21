@@ -69,6 +69,26 @@ pip install -r requirements.txt
 pip install xformers==0.0.27.post2 --index-url https://download.pytorch.org/whl/cu121
 ```
 
+## 🎯 Quick Start (Local Testing)
+
+Para testar rapidamente o sistema sem Docker:
+
+```bash
+# Instalar apenas dependências básicas para teste
+pip install trimesh scipy numpy pytest
+
+# Rodar demo para ver o sistema em ação
+python demo.py
+
+# Rodar testes
+python -m pytest tests/ -v
+```
+
+Isto irá gerar arquivos STL de teste na pasta `outputs/` demonstrando:
+- Geração de malhas com validação watertight
+- Pipeline de processamento (reparo, escala, validação)
+- Diferentes formas geométricas (box, sphere, cylinder)
+
 ## 📦 Dependências Principais
 
 - **PyTorch 2.4.0** com CUDA 12.1
@@ -104,19 +124,24 @@ Ver `requirements.txt` para lista completa.
 - [x] Arquivos de contexto do projeto
 - [x] Padrões de código
 
-### 🚧 SPRINT 1: Infraestrutura (Em Andamento)
+### ✅ SPRINT 1: Infraestrutura (Completo)
 - [x] Criar `Dockerfile` otimizado
 - [x] Criar `requirements.txt`
-- [ ] Implementar `src/core/generator.py` (Mock Class)
+- [x] Implementar `src/core/base_generator.py` (Abstract Base Class)
+- [x] Implementar `src/core/mock_generator.py` (Mock Class com validação watertight)
+- [x] Criar estrutura de projeto completa
+- [x] Implementar pipeline de processamento 3D
 - [ ] Configurar GitHub Action para build automático
 
 ### 📅 SPRINT 2: Integração de IA
 - [ ] Implementar `TrellisGenerator`
 - [ ] Script de download de pesos
 
-### 📅 SPRINT 3: Processamento 3D
-- [ ] Pipeline de limpeza de malha (Trimesh)
-- [ ] Validação de Manifold
+### ✅ SPRINT 3: Processamento 3D (Completo)
+- [x] Pipeline de limpeza de malha (Trimesh)
+- [x] Validação de Manifold com `mesh.is_watertight`
+- [x] Normalização de escala
+- [x] Sistema completo de reparo de malhas
 
 ### 📅 SPRINT 4: UI & Blender
 - [ ] Gradio App
