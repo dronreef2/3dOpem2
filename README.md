@@ -1,98 +1,156 @@
-# NeuroForge 3D - Text-to-STL Generator
+# NeuroForge 3D
 
-> AI-powered system to generate printable 3D models from text prompts using Trellis/Hunyuan3D.
+Sistema "Text-to-Printable-3D" open-source focado em geometria válida para impressão 3D (watertight STLs) usando Microsoft TRELLIS.
 
-## 📖 Project Documentation
+## 📋 Visão Geral
 
-This project follows a structured development approach with detailed planning:
+NeuroForge 3D é um projeto que utiliza modelos de IA de última geração para gerar modelos 3D imprimíveis a partir de texto ou imagens. O sistema é construído sobre o [Microsoft TRELLIS](https://github.com/microsoft/TRELLIS), uma solução state-of-the-art para geração 3D, com foco especial em garantir que os modelos gerados sejam watertight (fechados) e prontos para impressão 3D.
 
-- **[PROJECT_CONTEXT.md](PROJECT_CONTEXT.md)** - Mission, stack, and architecture overview
-- **[ROADMAP.md](ROADMAP.md)** - High-level development sprints (0-4)
-- **[TECHNICAL_BLUEPRINT.md](TECHNICAL_BLUEPRINT.md)** - Detailed technical execution plan with 30 actionable work tickets
-- **[CODING_STANDARDS.md](CODING_STANDARDS.md)** - AI agent coding guidelines
+## 🛠️ Stack Tecnológica
+
+- **Core AI:** Microsoft TRELLIS
+- **Processamento 3D:** Trimesh (foco em `is_watertight` e `repair`)
+- **Infraestrutura:** Docker com NVIDIA CUDA 12.1
+- **Interface:** Gradio + Blender Add-on (futuro)
+- **Python:** 3.10+
+- **PyTorch:** 2.4.0 com CUDA 12.1
 
 ## 🚀 Quick Start
 
-Follow the detailed instructions in [TECHNICAL_BLUEPRINT.md](TECHNICAL_BLUEPRINT.md) to begin development.
+### Pré-requisitos
 
-### Immediate First Steps (Sprint 0)
+- Docker com suporte a GPU (nvidia-docker)
+- NVIDIA GPU com pelo menos 16GB de memória
+- CUDA Toolkit 12.1 ou superior
 
-> **Note:** For complete setup commands including .gitkeep files and .gitignore configuration, see the "Comandos de Inicialização" section in [TECHNICAL_BLUEPRINT.md](TECHNICAL_BLUEPRINT.md).
+### Instalação com Docker
 
+1. Clone o repositório:
 ```bash
-# 1. Create project structure
-mkdir -p .github/workflows .devcontainer docs scripts src/{core,processing,ui,utils} tests models outputs
-touch models/.gitkeep outputs/.gitkeep
-
-# 2. Set up Python environment
-python3 -m venv .venv
-source .venv/bin/activate
-pip install --upgrade pip
-pip install black ruff pytest
-
-# 3. Start implementing Sprint 0 tasks
-# See TECHNICAL_BLUEPRINT.md for detailed task breakdown
+git clone https://github.com/dronreef2/3dOpem2.git
+cd 3dOpem2
 ```
 
-## 🏗️ Architecture
+2. Construa a imagem Docker:
+```bash
+docker build -t neuroforge3d:sprint1 .
+```
 
-- **Core AI:** Microsoft TRELLIS or Hunyuan3D-2
-- **Processing:** Trimesh (mesh repair and validation)
-- **Infrastructure:** Docker with NVIDIA CUDA 12.1
-- **Interface:** Gradio web UI + Blender Add-on
+3. Execute o container:
+```bash
+docker run --gpus all -it --rm \
+  -v $(pwd):/app \
+  -p 7860:7860 \
+  neuroforge3d:sprint1
+```
 
-## 🛠️ Development Sprints
+### Instalação Local (Alternativa)
 
-| Sprint | Focus | Tasks |
-|--------|-------|-------|
-| **Sprint 0** | Agentic Ecosystem Setup | 5 tasks |
-| **Sprint 1** | Infrastructure & Mock Generator | 6 tasks |
-| **Sprint 2** | AI Integration (Trellis/Hunyuan) | 6 tasks |
-| **Sprint 3** | Mesh Processing Pipeline | 6 tasks |
-| **Sprint 4** | UI & Blender Integration | 7 tasks |
+1. Crie um ambiente virtual:
+```bash
+python3.10 -m venv venv
+source venv/bin/activate  # Linux/Mac
+# ou
+venv\Scripts\activate  # Windows
+```
 
-**Total: 30 actionable work tickets** - See [TECHNICAL_BLUEPRINT.md](TECHNICAL_BLUEPRINT.md) for details.
+2. Instale PyTorch com CUDA 12.1:
+```bash
+pip install torch==2.4.0 torchvision==0.19.0 --index-url https://download.pytorch.org/whl/cu121
+```
 
-## 🤖 Agentic Tools Integration
+3. Instale as dependências:
+```bash
+pip install -r requirements.txt
+```
 
-This project leverages AI-powered development tools:
+4. Instale xformers:
+```bash
+pip install xformers==0.0.27.post2 --index-url https://download.pytorch.org/whl/cu121
+```
 
-- **Gemini Code Assist:** Automated code review on pull requests
-- **Agentic Search AI:** Research latest documentation before coding
-- **GitHub Actions:** Automated CI/CD pipeline
+## 📦 Dependências Principais
 
-## 📋 Development Workflow
+- **PyTorch 2.4.0** com CUDA 12.1
+- **Trimesh** - Processamento e validação de malhas 3D
+- **Open3D** - Visualização e processamento de nuvens de pontos
+- **Transformers** - Modelos de linguagem e visão
+- **Gradio** - Interface web
+- **xformers** - Mecanismos de atenção otimizados
 
-1. Review the task in [TECHNICAL_BLUEPRINT.md](TECHNICAL_BLUEPRINT.md)
-2. Use Agentic Search (where indicated) to verify latest APIs/versions
-3. Implement following [CODING_STANDARDS.md](CODING_STANDARDS.md)
-4. Submit PR for Gemini Code Assist review
-5. Validate with automated CI/CD
+Ver `requirements.txt` para lista completa.
 
-## 🎯 Success Metrics
+## 🗂️ Estrutura do Projeto (Planejada)
 
-- Docker images < 8GB
-- Mesh processing with 90%+ repair success
-- UI supports 10+ concurrent users
-- Generated STLs are printable (watertight)
+```
+3dOpem2/
+├── src/
+│   ├── core/
+│   │   └── generator.py      # Interface principal de geração
+│   ├── processors/
+│   │   └── mesh_cleaner.py   # Pipeline de limpeza de malha
+│   └── utils/
+├── models/                    # Pesos dos modelos (não versionados)
+├── outputs/                   # Resultados gerados
+├── tests/
+├── Dockerfile
+├── requirements.txt
+└── README.md
+```
 
-## 📚 Resources
+## 🏃 Roadmap de Desenvolvimento
 
-- [Trimesh Documentation](https://trimsh.org/)
-- [Gradio Documentation](https://gradio.app/docs/)
-- [Blender Python API](https://docs.blender.org/api/current/)
-- [HuggingFace Hub](https://huggingface.co/docs/hub/)
+### ✅ SPRINT 0: Configuração (Concluído)
+- [x] Arquivos de contexto do projeto
+- [x] Padrões de código
 
-## 📝 License
+### 🚧 SPRINT 1: Infraestrutura (Em Andamento)
+- [x] Criar `Dockerfile` otimizado
+- [x] Criar `requirements.txt`
+- [ ] Implementar `src/core/generator.py` (Mock Class)
+- [ ] Configurar GitHub Action para build automático
 
-[To be determined]
+### 📅 SPRINT 2: Integração de IA
+- [ ] Implementar `TrellisGenerator`
+- [ ] Script de download de pesos
 
-## 👥 Contributing
+### 📅 SPRINT 3: Processamento 3D
+- [ ] Pipeline de limpeza de malha (Trimesh)
+- [ ] Validação de Manifold
 
-This is an early-stage project. Follow the technical blueprint for structured contribution.
+### 📅 SPRINT 4: UI & Blender
+- [ ] Gradio App
+- [ ] Blender Add-on
+
+## 🔧 Ferramentas de Desenvolvimento
+
+- **Gemini Code Assist:** Revisão automática de código em Pull Requests
+- **Agentic Search AI:** Pesquisa de documentações atualizadas
+- **GitHub Actions:** CI/CD automatizado
+
+## 📝 Contribuindo
+
+Este é um projeto open-source. Para contribuir:
+
+1. Fork o repositório
+2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
+3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
+4. Push para a branch (`git push origin feature/AmazingFeature`)
+5. Abra um Pull Request (será revisado pelo Gemini Code Assist)
+
+## 📄 Licença
+
+Este projeto está sob a licença MIT. Ver arquivo `LICENSE` para mais detalhes.
+
+## 🙏 Agradecimentos
+
+- [Microsoft TRELLIS](https://github.com/microsoft/TRELLIS) - Core AI para geração 3D
+- Comunidade open-source de ferramentas 3D
+
+## 📧 Contato
+
+Para questões e suporte, abra uma issue no GitHub.
 
 ---
 
-**Status:** 🚧 In Development  
-**Version:** 0.1.0-alpha  
-**Last Updated:** November 2024
+**Nota:** Este projeto está em desenvolvimento ativo. A API e estrutura podem mudar frequentemente durante as primeiras sprints.
