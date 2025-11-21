@@ -108,7 +108,7 @@ CMD ["/bin/bash"]
 # Health check (verify Python and PyTorch are working)
 # Updated for CPU-only deployment compatibility
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD python3 -c "import sys; import torch; sys.exit(0)" || exit 1
+    CMD python3 -c "import torch; torch.zeros(1)" || exit 1
 
 # Labels for documentation
 LABEL maintainer="NeuroForge 3D Team"
