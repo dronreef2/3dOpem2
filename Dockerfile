@@ -33,18 +33,18 @@ WORKDIR /build
 # Copy requirements file first (for Docker layer caching)
 COPY requirements.txt /build/requirements.txt
 
-# Install PyTorch with CUDA 12.1 support
+# Install PyTorch with CPU-only support
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip3 install --no-cache-dir \
     torch==2.4.0 \
     torchvision==0.19.0 \
-    --index-url https://download.pytorch.org/whl/cu121
+    --index-url https://download.pytorch.org/whl/cpu
 
-# Install xformers for attention mechanisms (CUDA-dependent)
+# Install xformers for attention mechanisms (CPU-compatible)
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip3 install --no-cache-dir \
     xformers==0.0.27.post2 \
-    --index-url https://download.pytorch.org/whl/cu121
+    --index-url https://download.pytorch.org/whl/cpu
 
 # Install all other Python dependencies with pip cache mounting
 RUN --mount=type=cache,target=/root/.cache/pip \

@@ -23,6 +23,13 @@ jobs:
       packages: write
 
     steps:
+      - name: Free up disk space
+        uses: jlumbroso/free-disk-space@main
+        with:
+          clean_cache_tools: true
+          clean_android: true
+          clean_dotnet: true
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
