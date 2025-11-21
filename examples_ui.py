@@ -90,14 +90,14 @@ Method 2 - Docker Run:
     
     docker run --gpus all -p 7860:7860 \
       -v $(pwd)/outputs:/app/outputs \
-      neuroforge3d:sprint1 \
+      neuroforge3d:latest \
       python launch_ui.py
 
 Method 3 - Docker Run with Custom Port:
     
     docker run --gpus all -p 8080:7860 \
       -v $(pwd)/outputs:/app/outputs \
-      neuroforge3d:sprint1 \
+      neuroforge3d:latest \
       python launch_ui.py
 
     # Access at http://localhost:8080

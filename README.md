@@ -33,7 +33,7 @@ cd 3dOpem2
 
 2. Construa a imagem Docker:
 ```bash
-docker build -t neuroforge3d:sprint1 .
+docker build -t neuroforge3d:latest .
 ```
 
 3. Execute o container:
@@ -41,7 +41,7 @@ docker build -t neuroforge3d:sprint1 .
 docker run --gpus all -it --rm \
   -v $(pwd):/app \
   -p 7860:7860 \
-  neuroforge3d:sprint1
+  neuroforge3d:latest
 ```
 
 ### Instalação Local (Alternativa)
@@ -112,7 +112,7 @@ docker-compose up
 
 **Com Docker Run:**
 ```bash
-docker run --gpus all -p 7860:7860 -v $(pwd)/outputs:/app/outputs neuroforge3d:sprint1 python launch_ui.py
+docker run --gpus all -p 7860:7860 -v $(pwd)/outputs:/app/outputs neuroforge3d:latest python launch_ui.py
 ```
 
 **Localmente:**
@@ -163,7 +163,7 @@ Se você usa Docker, mapeie o volume de outputs:
 docker-compose up
 
 # Ou com docker run
-docker run --gpus all -v $(pwd)/outputs:/app/outputs -p 7860:7860 neuroforge3d:sprint1
+docker run --gpus all -v $(pwd)/outputs:/app/outputs -p 7860:7860 neuroforge3d:latest
 ```
 
 No Blender, configure o caminho local do diretório `outputs` nas preferências do add-on.

@@ -9,7 +9,7 @@ Usage:
     python launch_ui.py
 
     Or with Docker:
-    docker run --gpus all -p 7860:7860 neuroforge3d:sprint1 python launch_ui.py
+    docker run --gpus all -p 7860:7860 neuroforge3d:latest python launch_ui.py
 """
 
 import sys

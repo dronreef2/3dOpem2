@@ -5,7 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: neuroforge3d:sprint1
+    image: neuroforge3d:latest
     container_name: neuroforge3d-dev
     
     # Enable GPU support
@@ -23,7 +23,7 @@ services:
       - ./outputs:/app/outputs
       - ./models:/app/models
     
-    # Port mapping for Gradio (SPRINT 4)
+    # Port mapping for Gradio UI
     ports:
       - "7860:7860"
     
@@ -39,5 +39,5 @@ services:
     stdin_open: true
     tty: true
     
-    # Default command
+    # Default command (or use: python launch_ui.py to start Gradio)
     command: /bin/bash

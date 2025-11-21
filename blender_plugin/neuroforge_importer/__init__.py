@@ -189,9 +189,16 @@ class NEUROFORGE_OT_ImportSTL(Operator):
             
             # Optional: Set smooth angle (Auto Smooth)
             # This helps with edge detection for smooth shading
-            if hasattr(imported_obj.data, "use_auto_smooth"):
-                imported_obj.data.use_auto_smooth = True
-                imported_obj.data.auto_smooth_angle = 1.0472  # ~60 degrees in radians
+            # Note: use_auto_smooth is deprecated in Blender 4.1+
+            # For newer versions, smooth shading is sufficient
+            try:
+                if hasattr(imported_obj.data, "use_auto_smooth"):
+                    imported_obj.data.use_auto_smooth = True
+                    imported_obj.data.auto_smooth_angle = 1.0472  # ~60 degrees in radians
+            except AttributeError:
+                # Blender 4.1+ - auto smooth is handled differently
+                # Shade smooth is sufficient for most cases
+                pass
             
             self.report({'INFO'}, f"Successfully imported: {selected_file}")
             return {'FINISHED'}
