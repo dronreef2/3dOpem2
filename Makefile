@@ -90,11 +90,11 @@ clean-all: clean ## Remove tudo (incluindo outputs, models, venv)
 
 format: ## Formata código com black
 	@echo "$(GREEN)Formatando código...$(NC)"
-	black src/ tests/ *.py --exclude venv/
+	black src/ tests/ *.py --exclude='/(venv)/'
 
 lint: ## Executa linting com flake8
 	@echo "$(GREEN)Executando linting...$(NC)"
-	flake8 src/ tests/ --max-line-length=100 --exclude=venv/
+	flake8 src/ tests/ --max-line-length=100 --exclude=venv
 
 docs: ## Gera documentação
 	@echo "$(GREEN)Documentação disponível em:$(NC)"

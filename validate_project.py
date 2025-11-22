@@ -168,7 +168,7 @@ def check_python_syntax() -> Tuple[bool, List[str]]:
                 python_files.append(Path(root) / file)
     
     # Add other Python files
-    for file in ["demo.py", "launch_ui.py", "examples_ui.py"]:
+    for file in ["demo.py", "launch_ui.py", "examples_ui.py", "validate_project.py", "setup.py"]:
         if Path(file).exists():
             python_files.append(Path(file))
     
