@@ -39,5 +39,5 @@ services:
     stdin_open: true
     tty: true
     
-    # Default command (or use: python launch_ui.py to start Gradio)
-    command: /bin/bash
+    # Default command - automatically starts Gradio UI
+    command: python launch_ui.py
