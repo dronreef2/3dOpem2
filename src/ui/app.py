@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Gradio Web Interface for NeuroForge 3D.
 
@@ -17,6 +16,79 @@ import logging
 from pathlib import Path
 from typing import Optional, Tuple
 import gradio as gr
+
+# Workaround: make gradio_client.json_schema_to_python_type robust to
+# boolean/non-dict schemas. Some versions of Gradio/Gradio-client assume
+# the JSON Schema is a mapping and attempt membership checks like
+# `"const" in schema` which raises `TypeError` when `schema` is a bool.
+# We monkeypatch a safe wrapper at import time so the server API endpoints
+# won't produce 500 errors when unexpected schema shapes appear.
+try:
+    import gradio_client.utils as _gc_utils
+    __gc_orig = getattr(_gc_utils, "json_schema_to_python_type", None)
+
+    if __gc_orig is not None:
+        def _gc_safe_json_schema_to_python_type(schema, defs=None):
+            try:
+                return __gc_orig(schema, defs)
+            except TypeError:
+                if isinstance(schema, bool):
+                    return "bool"
+                if schema is None:
+                    return "None"
+                return "Any"
+
+        _gc_utils.json_schema_to_python_type = _gc_safe_json_schema_to_python_type
+
+    # Also patch the internal recursive parser which is the root cause
+    # of the TypeError observed at runtime: `_json_schema_to_python_type`
+    # may be called with plain booleans (True/False). Convert those
+    # boolean leaves into a small JSON Schema object so membership
+    # checks like `"const" in schema` work as expected.
+    __gc_internal = getattr(_gc_utils, "_json_schema_to_python_type", None)
+
+    if __gc_internal is not None:
+        def _gc_safe_internal_json_schema_to_python_type(schema, defs=None):
+            # Normalize boolean/non-mapping schemas into an object form
+            if isinstance(schema, bool):
+                schema = {"const": schema}
+            elif schema is None:
+                schema = {}
+            return __gc_internal(schema, defs)
+
+        _gc_utils._json_schema_to_python_type = _gc_safe_internal_json_schema_to_python_type
+except Exception:
+    # If gradio_client isn't available or monkeypatch fails, continue
+    # without the workaround; tests will surface the issue.
+    pass
+# Additional defensive patch: sanitize the API schema produced by Gradio
+# Blocks so downstream json-schema parsing never receives plain booleans
+# where an object/dict is expected. This avoids membership checks like
+# `"const" in schema` raising `TypeError`.
+try:
+    import gradio.blocks as _gb
+
+    _orig_get_api_info = getattr(_gb.Blocks, "get_api_info", None)
+
+    if _orig_get_api_info is not None:
+        def _sanitize_schema(obj):
+            if isinstance(obj, bool):
+                return {"const": obj}
+            if isinstance(obj, dict):
+                return {k: _sanitize_schema(v) for k, v in obj.items()}
+            if isinstance(obj, list):
+                return [_sanitize_schema(v) for v in obj]
+            return obj
+
+        def _gb_safe_get_api_info(self):
+            info = _orig_get_api_info(self)
+            return _sanitize_schema(info)
+
+        _gb.Blocks.get_api_info = _gb_safe_get_api_info
+except Exception:
+    # If gradio.blocks isn't available, skip sanitization; tests will surface
+    # any issues in environments without Gradio.
+    pass
 
 from ..core.trellis_generator import TrellisGenerator
 
