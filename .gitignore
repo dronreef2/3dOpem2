@@ -92,3 +92,10 @@ coverage.xml
 *.cover
 .hypothesis/
 .pytest_cache/
+
+# Diagnostics and local certificates
+problem_schema.json
+.gradio/
+
+# Local zip artifacts
+*.zip
